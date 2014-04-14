@@ -2,7 +2,17 @@
 <resources>
 
     <string name="app_name">Buoy Buddy</string>
-    <string name="hello_world">Hello world!</string>
+    <string-array name="planets_array">
+        <item>Santa Monica Bay Buoy</item><item>Venus</item>
+        <item>Block Island Buoy</item>
+        <item>Mars</item>
+        <item>Jupiter</item>
+        <item>Saturn</item>
+        <item>Uranus</item>
+        <item>Neptune</item>
+    </string-array>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
     <string name="action_settings">Settings</string>
 
 </resources>

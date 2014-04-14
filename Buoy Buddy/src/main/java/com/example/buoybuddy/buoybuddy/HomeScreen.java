@@ -1,17 +1,22 @@
 package com.example.buoybuddy.buoybuddy;
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.ListView;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -21,19 +26,93 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+//import android.app.FragmentManager;
+
 public class HomeScreen extends ActionBarActivity {
+    private String[] mPlanetTitles;
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
+    private ActionBarDrawerToggle mDrawerToggle;
+    private CharSequence mDrawerTitle;
+    private CharSequence mTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
-                    .commit();
+
+        mPlanetTitles = getResources().getStringArray(R.array.planets_array);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+
+        // Set the adapter for the list view
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+                R.layout.drawer_list_item, mPlanetTitles));
+        // Set the list's click listener
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+        mTitle = mDrawerTitle = getTitle();
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+                R.drawable.ic_launcher, R.string.drawer_open, R.string.drawer_close) {
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                getActionBar().setTitle(mTitle);
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                getActionBar().setTitle(mDrawerTitle);
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+        };
+        // Set the drawer toggle as the DrawerListener
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+    }
+    private class DrawerItemClickListener implements ListView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView parent, View view, int position, long id) {
+            selectItem(position);
         }
     }
 
+    /** Swaps fragments in the main content view */
+    private void selectItem(int position) {
+        // Create a new fragment and specify the planet to show based on position
+        Fragment fragment;
+        if (position ==0)
+            fragment = new PlaceholderFragment("http://www.ndbc.noaa.gov/data/realtime2/46221.spec");
+        if (position==1)
+            fragment = new PlaceholderFragment("http://www.ndbc.noaa.gov/data/realtime2/44097.spec");
+        else
+            fragment = new PlaceholderFragment("http://www.ndbc.noaa.gov/data/realtime2/46221.spec");
+
+        Bundle args = new Bundle();
+        //args.putInt(PlanetFragment.ARG_PLANET_NUMBER, position);
+        fragment.setArguments(args);
+
+        // Insert the fragment by replacing any existing fragment
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.content_frame, fragment)
+                .commit();
+
+        // Highlight the selected item, update the title, and close the drawer
+        mDrawerList.setItemChecked(position, true);
+        setTitle(mPlanetTitles[position]);
+        mDrawerLayout.closeDrawer(mDrawerList);
+    }
+
+    @Override
+    public void setTitle(CharSequence title) {
+        mTitle = title;
+        getActionBar().setTitle(mTitle);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -60,8 +139,10 @@ public class HomeScreen extends ActionBarActivity {
      */
     public class PlaceholderFragment extends Fragment {
         public GridView gridView;
+        public String url;
 
-        public PlaceholderFragment() {
+        public PlaceholderFragment(String _url) {
+        url=_url;
         }
 
         @Override
@@ -70,14 +151,14 @@ public class HomeScreen extends ActionBarActivity {
             setContentView(R.layout.fragment_home_screen);
             View rootView = inflater.inflate(R.layout.fragment_home_screen, container, false);
             gridView = (GridView) findViewById(R.id.gridview);
-            bindGridView();
+            bindGridView(url);
             return rootView;
         }
 
-        public void bindGridView() {
+        public void bindGridView(String url) {
            // DownloadWebPageTask task = new DownloadWebPageTask();
            // task.execute(new String[]{"http://www.google.com"});
-            new DownloadHtmlBuoyData(getActivity(), gridView).execute(new String[]{"http://www.ndbc.noaa.gov/data/realtime2/46221.spec"});
+            new DownloadHtmlBuoyData(getActivity(), gridView).execute(url);
         }
 
 
