@@ -3,8 +3,9 @@
 
     <string name="app_name">Buoy Buddy</string>
     <string-array name="planets_array">
-        <item>Santa Monica Bay Buoy</item><item>Venus</item>
+        <item>Santa Monica Bay Buoy</item>
         <item>Block Island Buoy</item>
+        <item>Venus</item>
         <item>Mars</item>
         <item>Jupiter</item>
         <item>Saturn</item>
